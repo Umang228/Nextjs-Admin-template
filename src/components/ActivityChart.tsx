@@ -1,10 +1,10 @@
 import React from 'react';
 
 const ActivityChart = ({ data }) => {
-  // Find the maximum value to scale the progress bars
+  // Finding the maximum value
   const maxValue = Math.max(...data.activity.monthly.map(activity => activity.value));
 
-  // Get only the first 4 values from the monthly data
+  // showing only the first 4 values from the monthly data
   const limitedValues = data.activity.monthly.slice(0, 4);
 
   return (
@@ -15,7 +15,6 @@ const ActivityChart = ({ data }) => {
           Month <span className="ml-1 text-gray-500">&#9660;</span>
         </span>
       </div>
-      {/* Grey line below the heading */}
       <hr className="border-t border-gray-300 mb-4" />
       
       <div className="flex justify-center">
@@ -27,20 +26,19 @@ const ActivityChart = ({ data }) => {
                 {activity.value}
               </span>
             ))
-            .reverse()} {/* Reverse only the values */}
+            .reverse()}
         </div>
 
         {/* Vertical Progress Bars */}
         <div className="flex space-x-4">
           {data.activity.monthly.map((activity, index) => (
             <div key={index} className="flex flex-col items-center">
-              {/* Vertical Progress Bar */}
               <div className="flex items-end h-32 w-2 bg-gray-200 rounded-full mb-2">
                 <div
                   className="w-full rounded-full"
                   style={{
-                    height: `${(activity.value / maxValue) * 100}%`, // Normalize the height based on the maximum value
-                    backgroundColor: '#ADD8E6', // Light blue color for the progress bar
+                    height: `${(activity.value / maxValue) * 100}%`,
+                    backgroundColor: '#ADD8E6',
                   }}
                 ></div>
               </div>

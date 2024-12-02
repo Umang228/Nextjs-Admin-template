@@ -1,115 +1,204 @@
-import Image from "next/image";
-import localFont from "next/font/local";
+import { useState, useEffect } from "react";
+import Sidebar from "../components/Sidebar";
+import MetricCard from "../components/MetricCard";
+import TopicsList from "../components/TopicsList";
+import Leaderboard from "../components/Leaderboard";
+import ActivityChart from "../components/ActivityChart";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+const Dashboard = () => {
+  const [data, setData] = useState<any>(null);
+  const [activePage, setActivePage] = useState("reports");
 
-export default function Home() {
+  useEffect(() => {
+    fetch("/task-data.json")
+      .then((res) => res.json())
+      .then((json) => setData(json));
+  }, []);
+
+  const handleDownload = async () => {
+    if (!data) return;
+  
+    try {
+  
+      const response = await fetch(
+        "https://testd5-img.azurewebsites.net/api/imgdownload",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ api: data.api_secret }),
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+  
+      const result = await response.json();
+  
+      const base64Image = result.image;
+      if (!base64Image) {
+        throw new Error("No image data found in the response.");
+      }
+  
+      const a = document.createElement("a");
+      a.href = `data:image/png;base64,${base64Image}`;
+      a.download = "dashboard_image.png";
+      a.click();
+    } catch (error) {
+      alert("An error occurred while downloading the image. Please try again.");
+    }
+  };
+   
+
+  if (!data) return <div>Loading...</div>;
+
   return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/pages/index.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar activePage={activePage} onNavigate={setActivePage} />
+      <main className="flex-1 p-6 space-y-8 overflow-y-auto">
+        <header className="flex justify-between items-center">
+          <h1 className="text-xl font-semibold text-gray-800">Reports</h1>
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={handleDownload}
+            >
+              <FontAwesomeIcon icon={faDownload} className="mr-2" />
+              Download
+            </button>
+          </div>
+        </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+        <div className="border-t border-gray-300" />
+
+        {/* Dropdown Section */}
+        <section className="flex justify-between gap-6">
+          <div className="w-1/3">
+            <select className="w-full py-2 px-4 border border-gray-300 rounded-md text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>Timeframe:</option>
+              <option>Last 7 days</option>
+              <option>This Month</option>
+              <option>This Year</option>
+              <option>All-time</option>
+              <option>Custom</option>
+            </select>
+          </div>
+          <div className="w-1/3">
+            <select className="w-full py-2 px-4 border border-gray-300 rounded-md text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>People:</option>
+              <option>All Users</option>
+              <option>Managers</option>
+              <option>Trainers</option>
+              <option>Umang</option>
+              <option>Deepanshu</option>
+            </select>
+          </div>
+          <div className="w-1/3">
+            <select className="w-full py-2 px-4 border border-gray-300 rounded-md text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>Topic:</option>
+              <option>Covid Protocols</option>
+              <option>Social Media</option>
+            </select>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div>
+            {/* Metric Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                {
+                  title: "Active Users",
+                  value: (
+                    <>
+                      <span>{data.metrics.active_users.current}</span>
+                      <span className="text-gray-400">
+                        /{data.metrics.active_users.total}
+                      </span>
+                    </>
+                  ),
+                },
+                {
+                  title: "Questions Answered",
+                  value: data.metrics.questions_answered,
+                },
+                {
+                  title: "Avg. Session Length",
+                  value: `${Math.floor(
+                    data.metrics.average_session_length_seconds / 60
+                  )}m ${data.metrics.average_session_length_seconds % 60}s`,
+                },
+                {
+                  title: "Starting Knowledge",
+                  value: `${data.metrics.starting_knowledge_percentage}%`,
+                },
+                {
+                  title: "Current Knowledge",
+                  value: `${data.metrics.current_knowledge_percentage}%`,
+                },
+                {
+                  title: "Knowledge Gain",
+                  value: `${
+                    data.metrics.current_knowledge_percentage -
+                    data.metrics.starting_knowledge_percentage
+                  }%`,
+                },
+              ].map((metric, index) => (
+                <MetricCard
+                  key={index}
+                  title={<span className="text-gray-600">{metric.title}</span>}
+                  value={metric.value}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div>
+            {/* Activity Chart */}
+            <ActivityChart data={data} />
+          </div>
+        </section>
+
+        {/* Weakest and Strongest Topics */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+          <div>
+            <TopicsList
+              data={data.topics.weakest}
+              title="Weakest Topics"
+              isStrong={false}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+          </div>
+
+          <div>
+            <TopicsList
+              data={data.topics.strongest}
+              title="Strongest Topics"
+              isStrong={true}
+            />
+          </div>
+        </section>
+
+        {/* User Leaderboard and Groups Leaderboard */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
+          <div>
+            <Leaderboard
+              title="User Leaderboard"
+              isUserLeaderboard={true}
+              data={data.user_leaderboard}
+            />
+          </div>
+          <div>
+            <Leaderboard
+              title="Groups Leaderboard"
+              isUserLeaderboard={false}
+              data={data.groups_leaderboard}
+            />
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
-}
+};
+
+export default Dashboard;

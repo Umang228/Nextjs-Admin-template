@@ -15,8 +15,8 @@ type Group = {
 
 type Props = {
   title: string;
-  isUserLeaderboard: boolean; // Flag to differentiate between user and group leaderboard
-  data: (User | Group)[]; // Union type for user and group data
+  isUserLeaderboard: boolean;
+  data: (User | Group)[];
 };
 
 const Leaderboard = ({ title, isUserLeaderboard, data }: Props) => {
@@ -28,10 +28,9 @@ const Leaderboard = ({ title, isUserLeaderboard, data }: Props) => {
           // Determine if the accuracy has increased or decreased
           const isAccuracyImproved = 'accuracy_percentage' in entry && 'previous_accuracy_percentage' in entry
             ? entry.accuracy_percentage > entry.previous_accuracy_percentage
-            : true; // Assume accuracy is improved if no previous data is available
+            : true;
           return (
             <li key={index} className="flex items-start space-x-4">
-              {/* Image and Name */}
               {"image" in entry ? (
                 <img src={entry.image} alt={entry.name} className="w-16 h-16 rounded-full" />
               ) : (
@@ -42,7 +41,7 @@ const Leaderboard = ({ title, isUserLeaderboard, data }: Props) => {
               <div className="flex-1">
                 <span className="font-semibold">{'name' in entry ? entry.name : entry.group_name}</span>
 
-                {/* Points and Accuracy on a single line */}
+                {/* Points and Accuracy */}
                 <div className="mt-1 text-sm">
                   {'points' in entry ? (
                     <span className="block">
@@ -64,7 +63,7 @@ const Leaderboard = ({ title, isUserLeaderboard, data }: Props) => {
                     isAccuracyImproved ? "text-green-500 rotate-180" : "text-red-500 rotate-0 mt-0"
                   }`}
                 >
-                  ▼ {/* Triangle (Arrow) */}
+                  ▼ 
                 </span>
               </div>
             </li>
