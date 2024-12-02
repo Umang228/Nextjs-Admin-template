@@ -1,6 +1,22 @@
 import React from 'react';
 
-const ActivityChart = ({ data }) => {
+// Define the types for the data
+interface MonthlyActivity {
+  month: string;
+  value: number;
+}
+
+interface ActivityData {
+  activity: {
+    monthly: MonthlyActivity[];
+  };
+}
+
+interface ActivityChartProps {
+  data: ActivityData;
+}
+
+const ActivityChart: React.FC<ActivityChartProps> = ({ data }) => {
   // Finding the maximum value
   const maxValue = Math.max(...data.activity.monthly.map(activity => activity.value));
 

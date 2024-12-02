@@ -27,7 +27,7 @@ const Leaderboard = ({ title, isUserLeaderboard, data }: Props) => {
         {data.map((entry, index) => {
           // Determine if the accuracy has increased or decreased
           const isAccuracyImproved = 'accuracy_percentage' in entry && 'previous_accuracy_percentage' in entry
-            ? entry.accuracy_percentage > entry.previous_accuracy_percentage
+            ? entry.accuracy_percentage > (entry.previous_accuracy_percentage ?? 0)
             : true;
           return (
             <li key={index} className="flex items-start space-x-4">
