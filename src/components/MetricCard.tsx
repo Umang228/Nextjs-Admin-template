@@ -1,4 +1,5 @@
-type Props = { title: string; value: string | number };
+import React, { ReactNode } from 'react';
+type Props = { title: string | ReactNode; value: string | number };
 
 const MetricCard = ({ title, value }: Props) => {
   return (
